@@ -1,0 +1,91 @@
+## This file is used for documenting endpoints
+## Endpoints can also be tested using the following VS Code extension 
+## https://marketplace.visualstudio.com/items?itemName=humao.rest-client
+
+@apiRoot = http://localhost:8080/api
+
+
+###
+### /hw
+###
+
+# Returns a simple "Hello, World" message
+# URL Parameters:
+# 
+# Data Parameters:
+# 
+GET {{apiRoot}}/hw
+###
+
+
+###
+### /users
+###
+
+# Returns all users
+# URL Parameters:
+# 
+# Data Parameters:
+# 
+GET {{apiRoot}}/users
+###
+
+# Adds a new user
+# URL Parameters:
+# 
+# Data Parameters:
+#   firstName:  string  (required)
+#   lastName:   string  (required)
+#   email:      string  (required)
+#   password:   string  (required)
+#   active:     boolean (optional)
+POST {{apiRoot}}/users
+Content-Type: application/json
+
+{
+  "firstName": "Ted",
+  "lastName": "Cook",
+  "email": "ted@email.com",
+  "password": "password"
+}
+###
+
+
+###
+### /user
+###
+
+# Returns a user
+# URL Parameters:
+#   id: int (required)
+# Data Parameters:
+# 
+GET {{apiRoot}}/user/1
+###
+
+# Updates a user
+# URL Parameters:
+#   id:         int     (required)
+# Data Parameters:
+#   firstName:  string  (optional)
+#   lastName:   string  (optional)
+#   email:      string  (optional)
+#   password:   string  (optional)
+#   active:     boolean (optional)
+PATCH {{apiRoot}}/user/1
+Content-Type: application/json
+
+{
+  "email": "ted@email.com",
+  "password": "password",
+  "active": false
+}
+###
+
+# Deletes a user
+# Parameters:
+#   id: int (required)
+# Data Parameters:
+# 
+DELETE {{apiRoot}}/user/1
+###
