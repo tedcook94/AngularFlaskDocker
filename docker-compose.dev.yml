@@ -4,6 +4,7 @@ services:
   # Nginx Router
   router:
     container_name: router_container
+    image: tedcook94/angularflask_router:dev
     build:
       # Build image using Dockerfile in router directory
       context: ./router
@@ -19,6 +20,7 @@ services:
   # Angular Client
   client:
     container_name: client_container
+    image: tedcook94/angularflask_client:dev
     build:
       # Build image using Dockerfile in client directory
       context: ./client
@@ -48,6 +50,7 @@ services:
   # Flask Server
   server:
     container_name: server_container
+    image: tedcook94/angularflask_server:dev
     build:
       # Build image using Dockerfile in server directory
       context: ./server
@@ -55,6 +58,9 @@ services:
     env_file: 
       # Pass in environment variables file
       - dev.env
+    environment:
+      # Pass in container name to display on hw endpoint
+      - CONTAINER_NAME=server_container
     volumes: 
       # Map server directory into container for live reload
       - './server:/app'
@@ -62,9 +68,21 @@ services:
       # Wait for database to start before starting this service
       - database
     restart: unless-stopped
+    healthcheck:
+      # Define a health check test to determine whether the container is running properly
+      test: wget --no-verbose --tries=1 --spider http://localhost:5000/api/hw || exit 1
+      # Set number of consecutive failed tests required to be "unhealthy"
+      retries: 3
+      # Set amount of time between tests
+      interval: 10s
+      # Set max duration of test before it's considered an automatic failure
+      timeout: 5s
+      # Set an initial amount of time where failed tests are considered part of start-up and not counted toward retries
+      start_period: 30s
   # PostgreSQL Database
   database:
     container_name: database_container
+    image: tedcook94/angularflask_database:dev
     build:
       # Build image using Dockerfile in database directory
       context: ./database

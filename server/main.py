@@ -12,9 +12,11 @@ db.init_app(app)
 
 # Register blueprints
 from api.hw import hw_blueprint
+from api.cpu import cpu_blueprint
 from api.users import users_blueprint
 
 app.register_blueprint(hw_blueprint, url_prefix='/api')
+app.register_blueprint(cpu_blueprint, url_prefix='/api')
 app.register_blueprint(users_blueprint, url_prefix='/api')
 
 

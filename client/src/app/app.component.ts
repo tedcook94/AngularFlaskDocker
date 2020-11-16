@@ -1,6 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 
 import { AppService } from './app.service';
+
+import { User } from '../models/user';
 
 @Component({
   selector: 'app-root',
@@ -8,8 +10,10 @@ import { AppService } from './app.service';
   styleUrls: ['./app.component.css']
 })
 
-export class AppComponent {
-  constructor(private service: AppService) { 
+export class AppComponent implements OnInit {
+  constructor(private service: AppService) {};
+
+  ngOnInit() {
     this.service.getHelloWorld().subscribe(
       (hw: any) => {
         this.helloWorld = JSON.stringify(hw);
@@ -17,12 +21,37 @@ export class AppComponent {
     );
     this.service.getUsers().subscribe(
       (users: any) => {
-        this.users = JSON.stringify(users);
+        this.users = users.users.map((user: User) => {
+          user.created = new Date(user.created);
+          return user;
+        });
       }
+    );
+  };
+
+  addUser() {
+    this.addError = '';
+    this.service.addUser(this.newUser).subscribe(
+      () => {
+        this.newUser = new User();
+        this.ngOnInit();
+      },
+      error => this.addError = error.message
+    );
+  }
+
+  deleteUser(userId: number) {
+    this.deleteError = '';
+    this.service.deleteUser(userId).subscribe(
+      () => this.ngOnInit(),
+      error => this.deleteError = error.message
     );
   }
   
   title: String = 'Test Page';
   helloWorld: String = '';
-  users: String = '';
+  users: User[] = [];
+  newUser: User = new User();
+  addError: String = '';
+  deleteError: String = '';
 }

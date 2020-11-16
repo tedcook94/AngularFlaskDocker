@@ -42,8 +42,8 @@ class User(BaseModel, db.Model):
   # Create a User from a JSON object
   def from_json(data: dict):
     return User(
-      first_name=data['firstName'], 
-      last_name=data['lastName'], 
+      first_name=data['name']['first'], 
+      last_name=data['name']['last'], 
       email=data['email'],
       password=data['password'],
       active=data.get('active', True)
@@ -53,11 +53,11 @@ class User(BaseModel, db.Model):
   def update_fields(self, data: dict):
     updated_fields: list = []
     if 'firstName' in data:
-      self.first_name = data['firstName']
-      updated_fields.append('firstName')
+      self.first_name = data['name']['first']
+      updated_fields.append('name.last')
     if 'lastName' in data:
-      self.last_name = data['lastName']
-      updated_fields.append('lastName')
+      self.last_name = data['name']['last']
+      updated_fields.append('name.last')
     if 'email' in data:
       self.email = data['email']
       updated_fields.append('email')

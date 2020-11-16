@@ -1,17 +1,68 @@
 <div>
+
   <p><b>{{ title }}</b></p>
+  
   <div>
     <p>
       /api/hw
       <br />
       {{ helloWorld }}
-  </p>
+    </p>
   </div>
+  
   <div>
-    <p>
-      /api/users
-      <br />
-      {{ users }}
-  </p>
+    /api/users
+    <table>
+      <tr>
+        <th>ID</th>
+        <th>First</th>
+        <th>Last</th>
+        <th>Email</th>
+        <th>Password</th>
+        <th>Active?</th>
+        <th>Created</th>
+        <th>Delete</th>
+      </tr>
+      <tr *ngFor="let user of users">
+        <td>{{ user.id }}</td>
+        <td>{{ user.name.first }}</td>
+        <td>{{ user.name.last }}</td>
+        <td>{{ user.email }}</td>
+        <td>{{ user.password }}</td>
+        <td>{{ user.active ? 'Yes' : 'No' }}</td>
+        <td>{{ user.created.toLocaleString('en-us', {timeZone: 'UTC'}) + ' UTC' }}</td>
+        <td><button (click)="deleteUser(user.id)">X</button></td>
+      </tr>
+    </table>
+    <p *ngIf="deleteError" style="color: red">{{ deleteError }}</p>
   </div>
+
+  <hr />
+
+  <label for="new-user"><b>New User</b></label>
+  <form name="new-user">
+    <label for="user-first">First Name</label>
+    <input name="user-first" [(ngModel)]="newUser.name.first" />
+
+    <br />
+
+    <label for="user-last">Last Name</label>
+    <input name="user-last" [(ngModel)]="newUser.name.last" />
+
+    <br />
+
+    <label for="user-email">Email</label>
+    <input name="user-email" [(ngModel)]="newUser.email" />
+
+    <br />
+
+    <label for="user-password">Password</label>
+    <input name="user-password" [(ngModel)]="newUser.password" />
+
+    <br />
+
+    <button (click)="addUser()">Add User</button>
+    <p *ngIf="addError" style="color: red">{{ addError }}</p>
+  </form>
+
 </div>

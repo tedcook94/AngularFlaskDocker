@@ -34,8 +34,8 @@ GET {{apiRoot}}/users
 # URL Parameters:
 # 
 # Data Parameters:
-#   firstName:  string  (required)
-#   lastName:   string  (required)
+#   name.first: string  (required)
+#   name.last:  string  (required)
 #   email:      string  (required)
 #   password:   string  (required)
 #   active:     boolean (optional)
@@ -43,9 +43,11 @@ POST {{apiRoot}}/users
 Content-Type: application/json
 
 {
-  "firstName": "Ted",
-  "lastName": "Cook",
-  "email": "ted@email.com",
+  "name": {
+    "first": "Ted",
+    "last": "Cook"
+  },
+  "email": "tcook@doozer.com",
   "password": "password"
 }
 ###
@@ -67,8 +69,8 @@ GET {{apiRoot}}/user/1
 # URL Parameters:
 #   id:         int     (required)
 # Data Parameters:
-#   firstName:  string  (optional)
-#   lastName:   string  (optional)
+#   name.first: string  (optional)
+#   name.last:  string  (optional)
 #   email:      string  (optional)
 #   password:   string  (optional)
 #   active:     boolean (optional)
@@ -76,7 +78,7 @@ PATCH {{apiRoot}}/user/1
 Content-Type: application/json
 
 {
-  "email": "ted@email.com",
+  "email": "tcook@doozer.com",
   "password": "password",
   "active": false
 }

@@ -1,0 +1,84 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: server
+  labels:
+    component: server
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      component: server
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+  template:
+    metadata:
+      labels:
+        component: server
+    spec:
+      containers:
+      - name: server-container
+        image: tedcook94/angularflask_server:ua
+        imagePullPolicy: Always
+        readinessProbe:
+          httpGet:
+            scheme: HTTP
+            path: /api/hw
+            port: 5000
+          periodSeconds: 5
+          timeoutSeconds: 5
+          initialDelaySeconds: 5
+        livenessProbe:
+          httpGet:
+            scheme: HTTP
+            path: /api/hw
+            port: 5000
+          failureThreshold: 3
+          periodSeconds: 10
+          timeoutSeconds: 5
+        resources:
+          limits:
+            cpu: "500m"
+            memory: "1Gi"
+        env:
+        - name: DB_HOSTNAME
+          valueFrom:
+            configMapKeyRef:
+              key: DB_HOSTNAME
+              name: ua-env
+        - name: DB_NAME
+          valueFrom:
+            configMapKeyRef:
+              key: DB_NAME
+              name: ua-env
+        - name: DB_PASSWORD
+          valueFrom:
+            configMapKeyRef:
+              key: DB_PASSWORD
+              name: ua-env
+        - name: DB_USER
+          valueFrom:
+            configMapKeyRef:
+              key: DB_USER
+              name: ua-env
+        - name: FLASK_DEBUG
+          valueFrom:
+            configMapKeyRef:
+              key: FLASK_DEBUG
+              name: ua-env
+        - name: FLASK_DEVELOPMENT
+          valueFrom:
+            configMapKeyRef:
+              key: FLASK_DEVELOPMENT
+              name: ua-env
+        - name: POD_NAME
+          valueFrom:
+            fieldRef:
+                fieldPath: metadata.name
+      restartPolicy: Always
+      serviceAccountName: ""
+      volumes: []
+status: {}

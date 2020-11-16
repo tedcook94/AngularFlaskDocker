@@ -1,0 +1,73 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: database
+  labels:
+    component: database
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      component: database
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+  template:
+    metadata:
+      labels:
+        component: database
+    spec:
+      containers:
+      - name: database-container
+        image: tedcook94/angularflask_database:ua
+        imagePullPolicy: Always
+        readinessProbe:
+          exec:
+            command:
+            - pg_isready 
+            - -U postgres || exit 1
+          periodSeconds: 5
+          timeoutSeconds: 5
+          initialDelaySeconds: 5
+        livenessProbe:
+          exec:
+            command:
+            - pg_isready 
+            - -U postgres || exit 1
+          failureThreshold: 3
+          periodSeconds: 10
+          timeoutSeconds: 5
+        resources: {}
+        env:
+          - name: DB_NAME
+            valueFrom:
+              configMapKeyRef:
+                key: DB_NAME
+                name: ua-env
+          - name: DB_PASSWORD
+            valueFrom:
+              configMapKeyRef:
+                key: DB_PASSWORD
+                name: ua-env
+          - name: DB_USER
+            valueFrom:
+              configMapKeyRef:
+                key: DB_USER
+                name: ua-env
+          - name: POSTGRES_PASSWORD
+            valueFrom:
+              configMapKeyRef:
+                key: POSTGRES_PASSWORD
+                name: ua-env
+        volumeMounts:
+        - mountPath: /var/lib/postgresql/data
+          name: database-data
+      restartPolicy: Always
+      serviceAccountName: ""
+      volumes:
+      - name: database-data
+        persistentVolumeClaim:
+          claimName: database-data
+status: {}

@@ -1,11 +1,11 @@
-# Angular + Flask + Docker Example
+# Angular + Flask + Docker/Kubernetes Example
 
 ## Overview
 
 This is an example of an application using an Angular front-end, Flask web 
 server, PostgreSQL database, SQLAlchemy ORM and Nginx router. All of these 
 components are packaged into individual Docker containers that can be run 
-simultaneously using Docker Compose.
+simultaneously using Docker Compose or Kubernetes.
 
 Each directory represents its own container:
 
@@ -23,7 +23,7 @@ Each directory represents its own container:
 
 Each directory contains its own Dockerfile (`dev.Dockerfile`) that defines
 how the container's image is built. Multiple Dockerfiles can exist to define
-different build configurations (e.g. `staging.Dockerfile`, `prod.Dockerfile`, 
+different build configurations (e.g. `ua.Dockerfile`, `prod.Dockerfile`, 
 etc.).
 
 `docker-compose.dev.yml` defines how all of the containers should run together
@@ -36,7 +36,7 @@ and `prod.env`).
 For more information on each of the components, see the READMEs in their 
 directories.
 
-## Building and Running
+## Building and Running with Docker Compose
 
 To run this project, begin by downloading Docker. On Linux, install Docker 
 Engine via your distro's package manager. On Mac and Windows, install Docker 
@@ -49,7 +49,7 @@ directory of the project, and run the following command:
 
 This will build all of the images and start the containers in a controlled 
 order. Once Docker has finished creating and starting the containers, the 
-terminal will display theoutput of each container and you will be able to 
+terminal will display the output of each container and you will be able to 
 access the client at `localhost:8080`.
 
 To stop the containers, press Ctrl+C in the terminal and wait for the 
@@ -76,6 +76,50 @@ good if you're experiencing issues and want to clear out your environment.
   - NOTE: if you run the `docker volume prune` portion of this command while 
   the `database_container` is not running, your local copy of the PostgreSQL 
   database will be deleted.
+
+## Building and Running with Kubernetes
+
+This repo contains an example of a UA deployment to Kubernetes. The Kubernetes
+configuration supports auto-scaling for the client and server components, as
+well as rolling updates for the client, server and database.
+
+To deploy to Kubernetes locally, download Docker as described above. Next, you
+will need to install a local Kubernetes cluster. On Mac and Windows, this can
+be done through Docker Desktop by selecting `Enable Kubernetes` under the Kubernetes
+heading in Settings. On Linux, you will wall want to install
+[minikube](https://minikube.sigs.k8s.io/docs/start/). After install, you can
+confirm Kubernetes is running with the command `kubectl version`.
+
+To install the UA deployment to your local Kubernetes cluster, run the `deploy.sh`
+script in the `kubernetes/ua` folder. That script will create all of the necessary
+Docker images, deployments, services, data claims, config maps and autoscalers,
+as well as creating an ingress to access the Kubernetes network.
+
+Once the script has completed, you should be able to access the client at
+`localhost:80`.
+
+The following are more useful commands relating to Kubernetes:
+
+- `kubectl get pods` will show a short status of all the current pods, while
+`kubectl describe pods` will show more information.
+  - `pods` can be replaced with any other Kubernetes object (e.g. deployments,
+  services, etc.) to get information on those.
+  - You can also use the `kubectl get pod <pod-name>` to get information on a
+  specific object.
+- The server component has a `/api/cpu` endpoint that can be used to simulate high
+CPU usage in order to test auto-scaling as follows:
+  - Run `kubectl run -i --tty load-generator --rm --image=busybox --restart=Never`
+  `--/bin/sh -c "while sleep 0.01; do wget -q -O- http://server-service:5000/api/cpu;`
+  `done"` in a terminal.
+  - Open a second terminal and run `kubectl get hpa` to see the status of all
+  Horizontal Pod Autoscalers.
+  - Watch how the CPU usage of the server pods will increase, eventually surpassing
+  the 50% target.
+  - The Autoscaler will then create a third pod, which you can see via `kubectl get pods`,
+  dropping the CPU usage below 50%.
+  - Stop the command in the first terminal, lowering the server CPU usage drastically.
+  - After several minutes, the Autoscaler will determine that the third pod is no longer
+  needed and terminate it.
 
 ## Miscellaneous
 
