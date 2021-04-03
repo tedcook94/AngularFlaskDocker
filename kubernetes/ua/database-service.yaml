@@ -5,6 +5,7 @@ metadata:
   labels:
     component: database
 spec:
+  type: NodePort
   ports:
   - name: "psql"
     port: 5432

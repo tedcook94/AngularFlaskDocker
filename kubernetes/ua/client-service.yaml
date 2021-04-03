@@ -5,6 +5,7 @@ metadata:
   labels:
     component: client
 spec:
+  type: NodePort
   ports:
   - name: "http"
     port: 4200

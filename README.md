@@ -83,20 +83,63 @@ This repo contains an example of a UA deployment to Kubernetes. The Kubernetes
 configuration supports auto-scaling for the client and server components, as
 well as rolling updates for the client, server and database.
 
+### Local Deployment
+
 To deploy to Kubernetes locally, download Docker as described above. Next, you
 will need to install a local Kubernetes cluster. On Mac and Windows, this can
 be done through Docker Desktop by selecting `Enable Kubernetes` under the Kubernetes
-heading in Settings. On Linux, you will wall want to install
+heading in Settings. On Linux, you will want to install
 [minikube](https://minikube.sigs.k8s.io/docs/start/). After install, you can
 confirm Kubernetes is running with the command `kubectl version`.
 
-To install the UA deployment to your local Kubernetes cluster, run the `deploy.sh`
+To install the UA deployment to your local Kubernetes cluster, run the `local-deploy.sh`
 script in the `kubernetes/ua` folder. That script will create all of the necessary
 Docker images, deployments, services, data claims, config maps and autoscalers,
 as well as creating an ingress to access the Kubernetes network.
 
 Once the script has completed, you should be able to access the client at
 `localhost:80`.
+
+### AWS Deployment
+
+To deploy to AWS's Elastic Kubernetes Service (EKS), we will be using the `eksctl` 
+command line tool, which greatly streamlines the AWS configuration process.
+
+To install `eksctl`, consult the [eksctl Github repo](https://github.com/weaveworks/eksctl) 
+to find instructions for your OS. You will also need to follow instructions on installing 
+the [AWS CLI tool](https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2.html) 
+and [AWS IAM Authenticator](https://docs.aws.amazon.com/eks/latest/userguide/install-aws-iam-authenticator.html). Once all the required tools are installed, you will need to follow 
+[this guide](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-files.html) 
+on configuring AWS CLI connection.
+
+After configuring your environment, you can use `eksctl` to create an EKS cluster with 
+the following command: `eksctl create cluster --name angular-flask --version 1.19 --region us-east-1 --nodegroup-name angular-flask-nodes --node-type m5d.large --nodes 2`
+  - This command may take up to 30 minutes to complete, so be patient. You can also 
+  monitor progress on the [CloudFormation](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks?filteringStatus=active&filteringText=&viewNested=true&hideStacks=false) and [EKS](https://console.aws.amazon.com/eks/home?region=us-east-1#/clusters/angular-flask) 
+  web consoles.
+  - You can adjust parameters as necessary, but ensure that your selected 
+  [node-type](https://aws.amazon.com/ec2/instance-types/) contains storage for the 
+  database's persistent volume. Run `eksctl create cluster --help` for a full description 
+  of all available parameters.
+
+Before deploying to the newly created cluster, you must first add the AWS Load Balancer 
+Controller to the cluster by following 
+[this documentation](https://docs.aws.amazon.com/eks/latest/userguide/aws-load-balancer-controller.html).
+
+Finally, install the UA deployment to the EKS cluster by running the `aws-deploy.sh` 
+script in the `kubernetes/ua` folder. That script will create all of the necessary 
+Docker images, deployments, services, data claims, config maps and autoscalers, as well 
+as creating an ingress to access the Kubernetes network. Once the script has completed, 
+run `kubectl get ingress` to see the address you can reach the ingress at. If the 
+Address field hasn't been populated yet, wait and try again until it is. Once you 
+have the address, navigate to it in a browser to ensure that you can access the client. 
+Again, it may take a few minutes for the ingress to be configured and accessible.
+
+If you ever need to delete the cluster to reconfigure it or reduce costs, run 
+`eksctl delete cluster angular-flask`. Note that resources may still be in the process 
+of being deleted by Amazon even after the command completes. 
+
+### Useful Commands
 
 The following are more useful commands relating to Kubernetes:
 
@@ -106,6 +149,11 @@ The following are more useful commands relating to Kubernetes:
   services, etc.) to get information on those.
   - You can also use the `kubectl get pod <pod-name>` to get information on a
   specific object.
+- `kubectl config get-contexts` will show you the different Kubernetes contexts 
+you have configured. `kubectl config use-context <context-name>` will switch your 
+current context.
+  - This can be used to quickly switch back and forth between different Kubernetes 
+  instances, such as your local Kubernetes cluster and an AWS EKS cluster.
 - The server component has a `/api/cpu` endpoint that can be used to simulate high
 CPU usage in order to test auto-scaling as follows:
   - Run `kubectl run -i --tty load-generator --rm --image=busybox --restart=Never`

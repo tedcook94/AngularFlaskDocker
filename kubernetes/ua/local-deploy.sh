@@ -44,10 +44,10 @@ kubectl apply -f ./client-deployment.yaml
 kubectl apply -f ./client-service.yaml
 kubectl apply -f ./client-hpa.yaml
 
-# Configure ingress dependencies, wait for dependencies to be ready and apply ingress Deployment
-kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v0.40.2/deploy/static/provider/cloud/deploy.yaml
+# Configure ingress dependencies, wait for dependencies to be ready and apply Ingress
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/controller-v0.44.0/deploy/static/provider/cloud/deploy.yaml
 kubectl wait --for=condition=available --timeout=60s --all deployments --all-namespaces
-kubectl apply -f ./ingress.yaml
+kubectl apply -f ./local-ingress.yaml
 
 # Trigger a rolling update in case pods already exist
 kubectl rollout restart deployment database

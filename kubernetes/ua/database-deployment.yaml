@@ -26,16 +26,20 @@ spec:
         readinessProbe:
           exec:
             command:
-            - pg_isready 
-            - -U postgres || exit 1
+            - /bin/sh
+            - -c
+            - -e
+            - exec pg_isready -U "postgres" || exit 1
           periodSeconds: 5
           timeoutSeconds: 5
           initialDelaySeconds: 5
         livenessProbe:
           exec:
             command:
-            - pg_isready 
-            - -U postgres || exit 1
+            - /bin/sh
+            - -c
+            - -e
+            - exec pg_isready -U "postgres" || exit 1
           failureThreshold: 3
           periodSeconds: 10
           timeoutSeconds: 5
@@ -61,6 +65,8 @@ spec:
               configMapKeyRef:
                 key: POSTGRES_PASSWORD
                 name: ua-env
+          - name: PGDATA
+            value: "/var/lib/postgresql/data/pgdata"
         volumeMounts:
         - mountPath: /var/lib/postgresql/data
           name: database-data
